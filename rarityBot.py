@@ -3,7 +3,7 @@ import os
 
 from appSettings import isProduction
 from router import Router
-from routes import commands, hello, pony, iLoveTwilight, emergencyRaritwi, emergencyRarity, emergencyTwilight, test
+from routes import commands, hello, pony, iLoveTwilight, emergencyRaritwi, emergencyRarity, emergencyTwilight, test, whatDoYouThink
 
 if not isProduction():
     import dotenv
@@ -22,11 +22,13 @@ router.add('i love twilight', iLoveTwilight)
 router.add('emergency raritwi', emergencyRaritwi)
 router.add('emergency rarity', emergencyRarity)
 router.add('emergency twilight', emergencyTwilight)
-router.add('test', test)
-router.add('emote', hello)
-router.add('emote list', hello)
-router.add('emote add', hello)
-router.add('emote remove', hello)
+# router.add('test', test)
+# router.add('emote', hello)
+# router.add('emote list', hello)
+# router.add('emote add', hello)
+# router.add('emote remove', hello)
+router.add('what do you think', whatDoYouThink)
+router.add('do you agree', whatDoYouThink)
 
 @client.event
 async def on_ready():

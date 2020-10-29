@@ -53,3 +53,10 @@ async def test(message, path):
         cursor.execute("SELECT * FROM emotes;")
         for emote in cursor:
             print(emote)
+
+async emoteList(message, path):
+    connection = dbConnect.getConnection()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM emotes;")
+        for emote in cursor:
+            print(emote)
