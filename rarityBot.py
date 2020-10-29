@@ -4,7 +4,7 @@ import os
 from router import Router
 from routes import commands, hello, pony, emergencyRaritwi, emergencyRarity, emergencyTwilight
 
-token = "NzcxMjQzNDQ4OTI5MjIyNjc3.X5pSbw.Zxezhmt5sNxbNaOwSrpWaynbOkc"
+token = os.environ.get('token')
 client = discord.Client()
 router = Router()
 
