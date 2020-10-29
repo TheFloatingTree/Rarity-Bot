@@ -27,7 +27,6 @@ router.add('emote', hello)
 router.add('emote list', hello)
 router.add('emote add', hello)
 router.add('emote remove', hello)
-# fix problem with final token mixups
 
 @client.event
 async def on_ready():
