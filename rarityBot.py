@@ -1,5 +1,6 @@
 import discord
 import os
+import psycopg2
 
 from router import Router
 from routes import commands, hello, pony, iLoveTwilight, emergencyRaritwi, emergencyRarity, emergencyTwilight, whatDoYouThink

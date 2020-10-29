@@ -1,2 +1,4 @@
 dashieBot.py
 __pycache__
+.env
+.vscode

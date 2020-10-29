@@ -1,5 +1,6 @@
 from derpibooru import Search
 import random
+import dbConnect
 
 async def commands(message, path):
     await message.channel.send(
@@ -22,7 +23,7 @@ async def hello(message, path):
 
 async def pony(message, path):
     tags = path.split(' ')
-    for image in Search().query("pony", "safe", "solo", *tags).sort_by("random").limit(1):
+    for image in Search().query("safe", *tags).sort_by("random").limit(1):
         await message.channel.send(image.medium)
 
 async def iLoveTwilight(message, path):
@@ -33,11 +34,11 @@ async def emergencyRaritwi(message, path):
         await message.channel.send(image.medium)
 
 async def emergencyRarity(message, path):
-    for image in Search().query("rarity", "pony", "safe").sort_by("random").limit(1):
+    for image in Search().query("rarity", "pony", "safe", "solo").sort_by("random").limit(1):
         await message.channel.send(image.medium)
 
 async def emergencyTwilight(message, path):
-    for image in Search().query("twilight", "pony", "safe").sort_by("random").limit(1):
+    for image in Search().query("twilight", "pony", "safe", "solo").sort_by("random").limit(1):
         await message.channel.send(image.medium)
 
 async def whatDoYouThink(message, path):
@@ -45,3 +46,10 @@ async def whatDoYouThink(message, path):
         await message.channel.send("Hmm, yes, I agree.")
     else:
         await message.channel.send("Hmm, no, I don't agree.")
+
+async def test(message, path):
+    connection = dbConnect.getConnection()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM emotes;")
+        for emote in cursor:
+            print(emote)
