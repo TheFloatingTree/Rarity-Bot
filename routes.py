@@ -13,6 +13,7 @@ async def commands(message, path):
             emergency raritwi   Raritwi pictures.
             emergency rarity    Rarity pictures.
             emergency twilight  Twilight pictures.
+            what do you think   Decisions, decisions...
         """
         )
 
