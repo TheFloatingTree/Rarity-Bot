@@ -2,6 +2,9 @@ from derpibooru import Search
 import random
 import dbConnect
 
+def parametersValid(parameters):
+    return parameters != ''
+
 async def commands(message, path):
     await message.channel.send(
         """
@@ -47,16 +50,40 @@ async def whatDoYouThink(message, path):
     else:
         await message.channel.send("Hmm, no, I don't agree.")
 
-async def test(message, path):
+async def emote(message, path):
+    if not parametersValid(path):
+        return
+    parameters = path.split(' ') # expects [0] to be name
     connection = dbConnect.getConnection()
     with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM emotes;")
-        for emote in cursor:
-            print(emote)
+        cursor.execute("SELECT (source) FROM emotes WHERE name=%s;", (parameters[0], ))
+        await message.channel.send(cursor.fetchone()[0])
 
-async emoteList(message, path):
+async def emoteAdd(message, path):
+    if not parametersValid(path):
+        return
+    parameters = path.split(' ') # expects [0] to be name and [1] to be source
     connection = dbConnect.getConnection()
+    with connection.cursor() as cursor:
+        cursor.execute("INSERT INTO emotes (name, source) VALUES (%s, %s);", (parameters[0], parameters[1]))
+        connection.commit()
+    await message.channel.send(f"Successfully added {parameters[0]} as an emote!")
+
+async def emoteRemove(message, path):
+    if not parametersValid(path):
+        return
+    parameters = path.split(' ') # expects [0] to be name
+    connection = dbConnect.getConnection()
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM emotes WHERE name=%s;", (parameters[0], ))
+        connection.commit()
+    await message.channel.send(f"Successfully removed {parameters[0]}.")
+
+async def emoteList(message, path):
+    connection = dbConnect.getConnection()
+    output = ""
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM emotes;")
         for emote in cursor:
-            print(emote)
+            output += f"{emote[0]}. {emote[1]}\n"
+    await message.channel.send(output)
