@@ -2,7 +2,7 @@ import discord
 import os
 
 from router import Router
-from routes import commands, hello, pony, emergencyRaritwi, emergencyRarity, emergencyTwilight
+from routes import commands, hello, pony, emergencyRaritwi, emergencyRarity, emergencyTwilight, whatDoYouThink
 
 token = os.environ.get('token')
 client = discord.Client()
@@ -15,6 +15,8 @@ router.add('pony', pony)
 router.add('emergency raritwi', emergencyRaritwi)
 router.add('emergency rarity', emergencyRarity)
 router.add('emergency twilight', emergencyTwilight)
+router.add('what do you think', whatDoYouThink)
+router.add('do you agree', whatDoYouThink)
 
 @client.event
 async def on_ready():

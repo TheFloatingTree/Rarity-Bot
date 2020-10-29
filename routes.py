@@ -1,5 +1,5 @@
-import requests
-from derpibooru import Search, sort
+from derpibooru import Search
+import random
 
 async def commands(message, path):
     await message.channel.send(
@@ -38,3 +38,9 @@ async def emergencyRarity(message, path):
 async def emergencyTwilight(message, path):
     for image in Search().query("twilight", "pony", "safe").sort_by("random").limit(1):
         await message.channel.send(image.medium)
+
+async def whatDoYouThink(message, path):
+    if bool(random.getrandbits(1)):
+        await message.channel.send("Hmm, yes, I agree.")
+    else:
+        await message.channel.send("Hmm, no, I don't agree.")
