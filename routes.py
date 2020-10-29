@@ -8,16 +8,22 @@ def parametersValid(parameters):
 async def commands(message, path):
     await message.channel.send(
         """
-        To start talking to me, just preface any command with `rarity`
-        Commands:
-            help                Show help for commands.
-            hello               It's only fair to reciprocate!
-            pony *tags          Seach for pony images on derpibooru, tags are optional and separated by spaces.
-            i love twilight     Send the gif.
-            emergency raritwi   Raritwi pictures.
-            emergency rarity    Rarity pictures.
-            emergency twilight  Twilight pictures.
-            what do you think   Decisions, decisions...
+        ```
+To start talking to me, just preface any command with `rarity`
+Commands:
+    help                        Show help for commands.
+    hello                       It's only fair to reciprocate!
+    pony *tags                  Seach for pony images on derpibooru, tags are optional and separated by spaces.
+    i love twilight             Send the gif.
+    emergency raritwi           Raritwi pictures.
+    emergency rarity            Rarity pictures.
+    emergency twilight          Twilight pictures.
+    what do you think           Decisions, decisions...
+
+    emote [name]                Do an emote.
+    emote list                  List all availible emotes.
+    emote add [name] [source]   Add a new emote.
+    emote remove [name]         Remove an old emote.```
         """
         )
 
@@ -81,9 +87,9 @@ async def emoteRemove(message, path):
 
 async def emoteList(message, path):
     connection = dbConnect.getConnection()
-    output = ""
+    output = "Emotes:\n"
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM emotes;")
         for emote in cursor:
-            output += f"{emote[0]}. {emote[1]}\n"
+            output += f"{emote[1]}\n"
     await message.channel.send(output)
