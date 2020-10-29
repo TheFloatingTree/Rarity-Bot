@@ -1,11 +1,16 @@
 import discord
 import os
-import psycopg2
 
+from appSettings import isProduction
 from router import Router
-from routes import commands, hello, pony, iLoveTwilight, emergencyRaritwi, emergencyRarity, emergencyTwilight, whatDoYouThink
+from routes import commands, hello, pony, iLoveTwilight, emergencyRaritwi, emergencyRarity, emergencyTwilight, test
 
-token = os.environ.get('token')
+if not isProduction():
+    import dotenv
+    dotenv.load_dotenv()
+
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+
 client = discord.Client()
 router = Router()
 
@@ -17,12 +22,17 @@ router.add('i love twilight', iLoveTwilight)
 router.add('emergency raritwi', emergencyRaritwi)
 router.add('emergency rarity', emergencyRarity)
 router.add('emergency twilight', emergencyTwilight)
-router.add('what do you think', whatDoYouThink)
-router.add('do you agree', whatDoYouThink)
+router.add('test', test)
+router.add('emote', hello)
+router.add('emote list', hello)
+router.add('emote add', hello)
+router.add('emote remove', hello)
+# fix problem with final token mixups
 
 @client.event
 async def on_ready():
-    print(f'Logged in as {client.user}')
+    print(f"Logged in as {client.user}")
+    print("Running in " + ("production" if isProduction() else "development") + " mode.")
 
 @client.event
 async def on_message(message):
@@ -33,4 +43,4 @@ async def on_message(message):
         nextPath = str.lower(message.content).partition(' ')[2] # remove first token from path, pass along
         await router.resolve(message, nextPath)
 
-client.run(token)
+client.run(BOT_TOKEN)

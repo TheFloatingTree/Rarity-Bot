@@ -38,7 +38,7 @@ async def emergencyRarity(message, path):
         await message.channel.send(image.medium)
 
 async def emergencyTwilight(message, path):
-    for image in Search().query("twilight", "pony", "safe", "solo").sort_by("random").limit(1):
+    for image in Search().query("ts", "pony", "safe", "solo").sort_by("random").limit(1):
         await message.channel.send(image.medium)
 
 async def whatDoYouThink(message, path):

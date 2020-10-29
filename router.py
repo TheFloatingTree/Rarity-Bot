@@ -1,17 +1,23 @@
 class Router:
     def __init__(self):
-        self.tokenMap = dict()
-        pass
+        self.commandMap = dict()
 
-    def add(self, tokens, _next):
-        tokenList = tokens.split(' ')
-        for token in tokenList[:-1]:
-            self.tokenMap[token] = self.resolve
-        self.tokenMap[tokenList[-1]] = _next
+    def add(self, command, callback):
+        if command in self.commandMap:
+            raise Exception("Command already exists")
+        self.commandMap[command] = callback
 
     async def resolve(self, message, path):
         if not path:
             return
-        firstToken = path.partition(' ')[0] # get first token from path
-        nextPath = path.partition(' ')[2] # remove first token from path, pass along
-        await self.tokenMap[firstToken](message, nextPath)
+
+        mostSpecificCommand = ""
+        for command in self.commandMap.keys():
+            if path.startswith(command):
+                mostSpecificCommand = mostSpecificCommand if len(mostSpecificCommand) > len(command) else command
+
+        if not mostSpecificCommand:
+            return
+                
+        commandArguments = path.replace(mostSpecificCommand, '').strip()
+        await self.commandMap[mostSpecificCommand](message, commandArguments)
