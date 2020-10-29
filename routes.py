@@ -18,7 +18,9 @@ Commands:
     emergency raritwi           Raritwi pictures.
     emergency rarity            Rarity pictures.
     emergency twilight          Twilight pictures.
+
     what do you think           Decisions, decisions...
+    rate this                   0/10 never using again.
 
     emote [name]                Do an emote.
     emote list                  List all availible emotes.
@@ -55,6 +57,10 @@ async def whatDoYouThink(message, path):
         await message.channel.send("Hmm, yes, I agree.")
     else:
         await message.channel.send("Hmm, no, I don't agree.")
+
+async def rateThis(message, path):
+    rating = random.randint(0, 10)
+    await message.channel.send(f"I give it {rating}/10")
 
 async def emote(message, path):
     if not parametersValid(path):
