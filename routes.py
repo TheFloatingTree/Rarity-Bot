@@ -84,7 +84,7 @@ async def tellMeAJoke(message, path):
         "A pony walks into a bar.\n Ouch.",
         "Why did Twilight's rune backfire?\nShe didn't run a spell check.",
         "Why did the CMCs cross the road?\nThe rest were just following Scootaloo.",
-        "What car does Luna drive?\nA Moonborghini"
+        "What car does Luna drive?\nA Moonborghini."
         ]
     await message.channel.send(random.choice(jokes))
 
