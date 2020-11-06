@@ -3,7 +3,7 @@ import os
 
 from appSettings import isProduction
 from router import Router
-from routes import commands, hello, pony, iLoveTwilight, emergencyRaritwi, emergencyRarity, emergencyTwilight, whatDoYouThink, emoteList, emoteAdd, emoteRemove, emote, rateThis
+from routes import *
 
 if not isProduction():
     import dotenv
@@ -29,6 +29,8 @@ router.add('emergency twilight', emergencyTwilight)
 router.add('what do you think', whatDoYouThink)
 router.add('do you agree', whatDoYouThink)
 router.add('rate this', rateThis)
+router.add('tell me a joke', tellMeAJoke)
+router.add('tell me another joke', tellMeAJoke)
 
 router.add('emote', emote)
 router.add('emote list', emoteList)
