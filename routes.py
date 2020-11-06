@@ -68,7 +68,7 @@ async def tellMeAJoke(message, path):
         "What do you call it when your sister refuses to lower the moon?\nLunacy.",
         "Where do ponies go to get their shoes?\nFetlocker.",
         "What do you call a pretty rainbow pony?\nDashing.",
-        "What do you call a Draconequus that is removed from MLP?\nDiscard."
+        "What do you call a Draconequus that is removed from MLP?\nDiscard.",
         "How many children does Celestia have?\nOne. The Sun.",
         "What's my favourite time of day?\nTwilight. mwa <3"
         ]
@@ -107,7 +107,7 @@ async def emoteList(message, path):
     connection = dbConnect.getConnection()
     output = "Emotes:\n"
     with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM emotes;")
+        cursor.execute("SELECT (name) FROM emotes;")
         for emote in cursor:
-            output += f"{emote[1]}\n"
+            output += f"{emote[0]}\n"
     await message.channel.send(output)
