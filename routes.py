@@ -62,6 +62,18 @@ async def rateThis(message, path):
     rating = random.randint(0, 10)
     await message.channel.send(f"I give it {rating}/10")
 
+async def tellMeAJoke(message, path):
+    jokes = [
+        "You",
+        "What do you call it when your sister refuses to lower the moon?\nLunacy.",
+        "Where do ponies go to get their shoes?\nFetlocker.",
+        "What do you call a pretty rainbow pony?\nDashing.",
+        "What do you call a Draconequus that is removed from MLP?\nDiscard."
+        "How many children does Celestia have?\nOne. The Sun.",
+        "What's my favourite time of day?\nTwilight. mwa <3"
+        ]
+    await message.channel.send(random.choice(jokes))
+
 async def emote(message, path):
     if not parametersValid(path):
         return
