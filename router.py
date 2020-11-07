@@ -1,23 +1,30 @@
+import discord
+
 class Router:
     def __init__(self):
         self.commandMap = dict()
 
-    def add(self, command, callback):
-        if command in self.commandMap:
+    def add(self, command):
+        if command.message in self.commandMap:
             raise Exception("Command already exists")
-        self.commandMap[command] = callback
+        self.commandMap[command.message] = command
 
-    async def resolve(self, message, path):
+    async def resolve(self, message: discord.Message, path):
         if not path:
             return
 
-        mostSpecificCommand = ""
-        for command in self.commandMap.keys():
-            if path.startswith(command):
-                mostSpecificCommand = mostSpecificCommand if len(mostSpecificCommand) > len(command) else command
+        mostSpecificCommandMessage = ""
+        for commandMessage in self.commandMap.keys():
+            if path.startswith(commandMessage):
+                mostSpecificCommandMessage = mostSpecificCommandMessage if len(mostSpecificCommandMessage) > len(commandMessage) else commandMessage
 
-        if not mostSpecificCommand:
+        if not mostSpecificCommandMessage:
             return
                 
-        commandArguments = path.replace(mostSpecificCommand, '').strip()
-        await self.commandMap[mostSpecificCommand](message, commandArguments)
+        commandArguments = path.replace(mostSpecificCommandMessage, '').strip()
+
+        command = self.commandMap[mostSpecificCommandMessage]
+        if not isinstance(message.channel, discord.DMChannel) and command.dmOnly:
+            return
+
+        await command.callback(message, commandArguments)

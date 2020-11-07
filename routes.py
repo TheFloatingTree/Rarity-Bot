@@ -142,10 +142,30 @@ async def secretSantaInit(message: discord.Message, path):
             cursor.execute("INSERT INTO secret_santa (season, participant) VALUES (%s, %s)", (1, user.id))
             connection.commit()
 
-        await user.send("Testing!")
+        await user.send("Run 'Rarity secret santa add prompt' to put your prompt into the system.")
 
 async def secretSantaBegin(message, path):
     # Remove secret santa init reaction listener loop
     state = utilities.getState()
     state["secretSantaIsIniting"] = False
     utilities.setState(state)
+
+# rarity secret santa add prompt I want you to draw a picture of my oc
+async def secretSantaAddPrompt(message: discord.Message, path):
+    userId = str(message.author.id)
+    promptAttachments = list(map(lambda attachment: attachment.url, message.attachments))
+
+    connection = utilities.getDBConnection()
+    with connection.cursor() as cursor:
+            cursor.execute("UPDATE secret_santa SET prompt=%s, prompt_attachments=%s WHERE participant=%s", (path, promptAttachments, userId))
+            connection.commit()
+
+async def secretSantaWithdraw(message, path):
+    userId = str(message.author.id)
+
+    connection = utilities.getDBConnection()
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM secret_santa WHERE participant=%s;", (userId, ))
+        connection.commit()
+
+    await message.channel.send("You have successfully been removed from the secret santa event.")
