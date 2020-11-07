@@ -1,6 +1,7 @@
 from derpibooru import Search
 import random
-import dbConnect
+import utilities
+import discord
 
 def parametersValid(parameters):
     return parameters != ''
@@ -78,7 +79,7 @@ async def emote(message, path):
     if not parametersValid(path):
         return
     parameters = path.split(' ') # expects [0] to be name
-    connection = dbConnect.getConnection()
+    connection = utilities.getDBConnection()
     with connection.cursor() as cursor:
         cursor.execute("SELECT (source) FROM emotes WHERE name=%s;", (parameters[0], ))
         await message.channel.send(cursor.fetchone()[0])
@@ -87,7 +88,7 @@ async def emoteAdd(message, path):
     if not parametersValid(path):
         return
     parameters = path.split(' ') # expects [0] to be name and [1] to be source
-    connection = dbConnect.getConnection()
+    connection = utilities.getDBConnection()
     with connection.cursor() as cursor:
         cursor.execute("INSERT INTO emotes (name, source) VALUES (%s, %s);", (parameters[0], parameters[1]))
         connection.commit()
@@ -97,17 +98,54 @@ async def emoteRemove(message, path):
     if not parametersValid(path):
         return
     parameters = path.split(' ') # expects [0] to be name
-    connection = dbConnect.getConnection()
+    connection = utilities.getDBConnection()
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM emotes WHERE name=%s;", (parameters[0], ))
         connection.commit()
     await message.channel.send(f"Successfully removed {parameters[0]}.")
 
 async def emoteList(message, path):
-    connection = dbConnect.getConnection()
+    connection = utilities.getDBConnection()
     output = "Emotes:\n"
     with connection.cursor() as cursor:
         cursor.execute("SELECT (name) FROM emotes;")
         for emote in cursor:
             output += f"{emote[0]}\n"
     await message.channel.send(output)
+
+async def secretSantaInit(message: discord.Message, path):
+    # State stuff
+    state = utilities.getState()
+    if state["secretSantaIsIniting"] == True:
+        return
+    state["secretSantaIsIniting"] = True
+    utilities.setState(state)
+
+    # Send initial message to server chat
+    newMessage: discord.Message = await message.channel.send("Lets do a gift exchange! Respond to this message with :YES: to join in!")
+    await newMessage.add_reaction("<:YES:774509192442150922>")
+
+    # Listen for reactions in loop, send DM on reaction
+    client = utilities.getDiscordClient()
+    connection = utilities.getDBConnection()
+    while utilities.getState()["secretSantaIsIniting"]:
+        reaction, user = await client.wait_for('reaction_add', check= lambda reaction, user: str(reaction.emoji) == "<:YES:774509192442150922>" and user != newMessage.author)
+
+        # Check if participant has already been added, skip if has
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT (participant) FROM secret_santa WHERE participant=%s", (str(user.id), ))
+            if cursor.fetchone() != None:
+                continue
+
+        # Add participant
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO secret_santa (season, participant) VALUES (%s, %s)", (1, user.id))
+            connection.commit()
+
+        await user.send("Testing!")
+
+async def secretSantaBegin(message, path):
+    # Remove secret santa init reaction listener loop
+    state = utilities.getState()
+    state["secretSantaIsIniting"] = False
+    utilities.setState(state)

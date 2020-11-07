@@ -4,6 +4,7 @@ import os
 from appSettings import isProduction
 from router import Router
 from routes import *
+from utilities import getDiscordClient
 
 if not isProduction():
     import dotenv
@@ -11,7 +12,7 @@ if not isProduction():
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
-client = discord.Client()
+client = getDiscordClient()
 router = Router()
 
 router.add('help', commands)
@@ -36,6 +37,9 @@ router.add('emote', emote)
 router.add('emote list', emoteList)
 router.add('emote add', emoteAdd)
 router.add('emote remove', emoteRemove)
+
+router.add('secret santa init', secretSantaInit)
+router.add('secret santa begin', secretSantaBegin)
 
 @client.event
 async def on_ready():
