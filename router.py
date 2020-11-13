@@ -19,5 +19,5 @@ class Router:
         if not mostSpecificCommand:
             return
                 
-        commandArguments = path.replace(mostSpecificCommand, '').strip()
+        commandArguments = path.replace(mostSpecificCommand, '', 1).strip()
         await self.commandMap[mostSpecificCommand](message, commandArguments)
