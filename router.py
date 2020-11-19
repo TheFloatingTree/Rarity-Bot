@@ -21,10 +21,11 @@ class Router:
         if not mostSpecificCommandMessage:
             return
                 
-        commandArguments = path.replace(mostSpecificCommandMessage, '').strip()
+        commandArguments = path.replace(mostSpecificCommandMessage, '', 1).strip()
 
         command = self.commandMap[mostSpecificCommandMessage]
         if not isinstance(message.channel, discord.DMChannel) and command.dmOnly:
             return
 
         await command.callback(message, commandArguments)
+
