@@ -169,3 +169,8 @@ async def secretSantaWithdraw(message, path):
         connection.commit()
 
     await message.channel.send("You have successfully been removed from the secret santa event.")
+
+async def speak(message, path):
+    chatter = utilities.getChatter()
+    context, response = chatter.chat(path)
+    await message.channel.send(response)

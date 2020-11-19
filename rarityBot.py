@@ -43,6 +43,8 @@ router.add(Command('secret santa begin', secretSantaBegin, ""))
 router.add(Command('secret santa add prompt', secretSantaAddPrompt, "", dmOnly=True))
 router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True))
 
+router.add(Command('speak', speak, ""))
+
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")

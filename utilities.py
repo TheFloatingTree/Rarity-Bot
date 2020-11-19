@@ -1,12 +1,15 @@
 import os
 import psycopg2
 import discord
+from conversationData import data
+from chatter import Chatter
 
 import appSettings
 
 _connection = None
 _client = None
 _state = appSettings.defaultState
+_chatter = Chatter(data)
 
 def getDBConnection():
     global _connection
@@ -38,3 +41,7 @@ def getState():
 def setState(state):
     global _state
     _state = state
+
+def getChatter():
+    global _chatter
+    return _chatter
