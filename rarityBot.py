@@ -4,6 +4,8 @@ import os
 from appSettings import isProduction
 from router import Router
 from routes import *
+from utilities import getDiscordClient
+from command import Command
 
 if not isProduction():
     import dotenv
@@ -11,31 +13,37 @@ if not isProduction():
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
-client = discord.Client()
+client = getDiscordClient()
 router = Router()
 
-router.add('help', commands)
-router.add('commands', commands)
-router.add('hello', hello)
+router.add(Command('help', commands, "Show help for commands."))
+router.add(Command('hello', hello, "It's only fair to reciprocate!"))
 
-router.add('pony', pony)
+router.add(Command('pony', pony, ""))
 
-router.add('i love twilight', iLoveTwilight)
+router.add(Command('i love twilight', iLoveTwilight, ""))
 
-router.add('emergency raritwi', emergencyRaritwi)
-router.add('emergency rarity', emergencyRarity)
-router.add('emergency twilight', emergencyTwilight)
+router.add(Command('emergency raritwi', emergencyRaritwi, ""))
+router.add(Command('emergency rarity', emergencyRarity, ""))
+router.add(Command('emergency twilight', emergencyTwilight, ""))
 
-router.add('what do you think', whatDoYouThink)
-router.add('do you agree', whatDoYouThink)
-router.add('rate this', rateThis)
-router.add('tell me a joke', tellMeAJoke)
-router.add('tell me another joke', tellMeAJoke)
+router.add(Command('what do you think', whatDoYouThink, ""))
+router.add(Command('do you agree', whatDoYouThink, ""))
+router.add(Command('rate this', rateThis, ""))
+router.add(Command('tell me a joke', tellMeAJoke, ""))
+router.add(Command('tell me another joke', tellMeAJoke, ""))
 
-router.add('emote', emote)
-router.add('emote list', emoteList)
-router.add('emote add', emoteAdd)
-router.add('emote remove', emoteRemove)
+router.add(Command('emote', emote, ""))
+router.add(Command('emote list', emoteList, ""))
+router.add(Command('emote add', emoteAdd, ""))
+router.add(Command('emote remove', emoteRemove, ""))
+
+router.add(Command('secret santa init', secretSantaInit, ""))
+router.add(Command('secret santa begin', secretSantaBegin, ""))
+router.add(Command('secret santa add prompt', secretSantaAddPrompt, "", dmOnly=True))
+router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True))
+
+router.add(Command('speak', speak, ""))
 
 @client.event
 async def on_ready():
