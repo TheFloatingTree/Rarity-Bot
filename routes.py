@@ -10,7 +10,12 @@ async def commands(message, path):
     await message.channel.send(
         """
         ```
-To start talking to me, just preface any command with `rarity`
+I use natural language processing so you can talk to me with regular English!
+However, if I'm having trouble understanding you, you can run specific commands
+by using the !rarity trigger.
+
+For example: !rarity help
+
 Commands:
     help                        Show help for commands.
     hello                       It's only fair to reciprocate!
