@@ -184,7 +184,22 @@ async def secretSantaWithdraw(message, path):
 
     await message.channel.send("You have successfully been removed from the secret santa event.")
 
-async def speak(message, path):
+async def naturalLanguageCommand(message, content):
     chatter = utilities.getChatter()
-    context, response = chatter.chat(path)
-    await message.channel.send(response)
+    arguments = [""]
+
+    if isinstance(content, (tuple, list)):
+        lowercaseContent, normalizedContent = content
+        arguments = utilities.betweenQuotes(lowercaseContent)
+    else:
+        normalizedContent = content
+        
+    context, responseOrHandler = chatter.chat(normalizedContent)
+
+    if isinstance(responseOrHandler, str):
+        await message.channel.send(responseOrHandler)
+    else:
+        if arguments:
+            await responseOrHandler(message, utilities.normalizeText(arguments[0]))
+        else:
+            await responseOrHandler(message, "")

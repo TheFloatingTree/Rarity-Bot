@@ -1,15 +1,14 @@
 import os
 import psycopg2
 import discord
-from conversationData import data
-from chatter import Chatter
+import re
 
 import appSettings
 
 _connection = None
 _client = None
 _state = appSettings.defaultState
-_chatter = Chatter(data)
+_chatter = None
 
 def getDBConnection():
     global _connection
@@ -44,4 +43,26 @@ def setState(state):
 
 def getChatter():
     global _chatter
+    if not _chatter:
+        from conversationData import data
+        from chatter import Chatter
+        _chatter = Chatter(data)
     return _chatter
+
+def startsWithAny(content, tokens):
+    for token in tokens:
+        if content.startswith(token):
+            return True
+    return False
+
+def replaceAnyFront(content, tokens, replacement):
+    for token in tokens:
+        if content.startswith(token):
+            return content.replace(token, replacement)
+    return content
+
+def betweenQuotes(content):
+    return content.split('"')[1::2]
+
+def normalizeText(content):
+    return re.sub(r'[^ a-z]', '', str(content).lower()).strip()

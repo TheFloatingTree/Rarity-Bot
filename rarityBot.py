@@ -1,10 +1,11 @@
 import discord
 import os
+import re
 
 from appSettings import isProduction
 from router import Router
 from routes import *
-from utilities import getDiscordClient
+from utilities import getDiscordClient, startsWithAny, replaceAnyFront
 from command import Command
 
 if not isProduction():
@@ -43,7 +44,7 @@ router.add(Command('secret santa begin', secretSantaBegin, ""))
 router.add(Command('secret santa add prompt', secretSantaAddPrompt, "", dmOnly=True))
 router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True))
 
-router.add(Command('speak', speak, ""))
+router.add(Command('natural language command', naturalLanguageCommand, ""))
 
 @client.event
 async def on_ready():
@@ -55,8 +56,15 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if str.lower(message.content).startswith('rarity '):
+    triggerWords = ["rarity", "hey rarity", "ok rarity", "okay rarity", "so rarity"]
+
+    lowercaseContent = str(message.content).lower()
+    normalizedContent = re.sub(r'[^ a-z]', '', lowercaseContent)
+
+    if lowercaseContent.startswith('!rarity'):
         nextPath = str.lower(message.content).partition(' ')[2] # remove first token from path, pass along
         await router.resolve(message, nextPath)
-
+    elif startsWithAny(normalizedContent, triggerWords):
+        await naturalLanguageCommand(message, (lowercaseContent, replaceAnyFront(normalizedContent, triggerWords, '')))
+        
 client.run(BOT_TOKEN)
