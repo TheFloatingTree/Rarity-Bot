@@ -56,7 +56,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    triggerWords = ["rarity", "hey rarity", "ok rarity", "okay rarity", "so rarity"]
+    triggerWords = ["rarity", "hey rarity", "ok rarity", "okay rarity", "so rarity", "yo rarity", "sup rarity"]
 
     lowercaseContent = str(message.content).lower()
     normalizedContent = re.sub(r'[^ a-z]', '', lowercaseContent)
