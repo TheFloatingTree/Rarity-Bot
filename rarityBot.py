@@ -45,6 +45,7 @@ router.add(Command('secret santa add prompt', secretSantaAddPrompt, "", dmOnly=T
 router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True))
 
 router.add(Command('natural language command', naturalLanguageCommand, ""))
+router.add(Command('run', runPython, ""))
 
 @client.event
 async def on_ready():
@@ -65,6 +66,6 @@ async def on_message(message):
         nextPath = str.lower(message.content).partition(' ')[2] # remove first token from path, pass along
         await router.resolve(message, nextPath)
     elif startsWithAny(normalizedContent, triggerWords):
-        await naturalLanguageCommand(message, (lowercaseContent, replaceAnyFront(normalizedContent, triggerWords, '')))
+        await naturalLanguageCommand(message, (message.content, replaceAnyFront(normalizedContent, triggerWords, '')))
         
 client.run(BOT_TOKEN)

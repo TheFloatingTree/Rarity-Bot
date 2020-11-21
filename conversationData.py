@@ -29,7 +29,7 @@ data = [
 
     ("Add an the emote", emoteAdd),
 
-    ("Remove an the emote", emoteRemove),
+    ("Remove an the this emote", emoteRemove),
 
     ("Do you love twilight?", iLoveTwilight),
 
@@ -44,6 +44,9 @@ data = [
     ("emergency twilight", emergencyTwilight),
     ("I need some pictures of twilight", emergencyTwilight),
     ("I need twilight", emergencyTwilight),
+
+    ("Run this python code", runPython),
+    ("Execute this python code", runPython),
 
     ("How are you?", "I'm doing very well, thank you!"),
     ("How are things?", "Things are going very well, thank you!"),

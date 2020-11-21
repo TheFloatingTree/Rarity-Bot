@@ -2,6 +2,9 @@ import os
 import psycopg2
 import discord
 import re
+import sys
+from io import StringIO
+import contextlib
 
 import appSettings
 
@@ -66,3 +69,20 @@ def betweenQuotes(content):
 
 def normalizeText(content):
     return re.sub(r'[^ a-z]', '', str(content).lower()).strip()
+
+@contextlib.contextmanager
+def stdoutIO(stdout=None):
+    old = sys.stdout
+    if stdout is None:
+        stdout = StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
+
+def evaluatePython(code):
+    with stdoutIO() as s:
+        try:
+            exec(code)
+            return s.getvalue()
+        except:
+            return ("Something is wrong with your code.")

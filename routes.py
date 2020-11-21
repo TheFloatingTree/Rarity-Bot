@@ -42,6 +42,7 @@ async def hello(message, path):
     await message.channel.send("Hello!")
 
 async def pony(message, path):
+    path = utilities.normalizeText(path)
     tags = path.split(' ')
     for image in Search().query("safe", *tags).sort_by("random").limit(1):
         await message.channel.send(image.medium)
@@ -99,6 +100,7 @@ async def tellMeAJoke(message, path):
     await message.channel.send(random.choice(jokes))
 
 async def emote(message, path):
+    path = utilities.normalizeText(path)
     if not parametersValid(path):
         return
     parameters = path.split(' ') # expects [0] to be name
@@ -108,6 +110,7 @@ async def emote(message, path):
         await message.channel.send(cursor.fetchone()[0])
 
 async def emoteAdd(message, path):
+    path = utilities.normalizeText(path)
     if not parametersValid(path):
         return
     parameters = path.split(' ') # expects [0] to be name and [1] to be source
@@ -118,6 +121,7 @@ async def emoteAdd(message, path):
     await message.channel.send(f"Successfully added {parameters[0]} as an emote!")
 
 async def emoteRemove(message, path):
+    path = utilities.normalizeText(path)
     if not parametersValid(path):
         return
     parameters = path.split(' ') # expects [0] to be name
@@ -198,8 +202,8 @@ async def naturalLanguageCommand(message, content):
     arguments = [""]
 
     if isinstance(content, (tuple, list)):
-        lowercaseContent, normalizedContent = content
-        arguments = utilities.betweenQuotes(lowercaseContent)
+        originalContent, normalizedContent = content
+        arguments = utilities.betweenQuotes(originalContent)
     else:
         normalizedContent = content
         
@@ -209,6 +213,10 @@ async def naturalLanguageCommand(message, content):
         await message.channel.send(responseOrHandler)
     else:
         if arguments:
-            await responseOrHandler(message, utilities.normalizeText(arguments[0]))
+            await responseOrHandler(message, arguments[0])
         else:
             await responseOrHandler(message, "")
+
+async def runPython(message, code):
+    output = utilities.evaluatePython(code)
+    await message.channel.send(output)
