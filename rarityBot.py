@@ -5,7 +5,7 @@ import re
 from appSettings import isProduction
 from router import Router
 from routes import *
-from utilities import getDiscordClient, startsWithAny, replaceAnyFront
+from utilities import getDiscordClient, startsWithAny, replaceAnyFront, cleanUpDBConnection
 from command import Command
 
 if not isProduction():
@@ -43,6 +43,10 @@ router.add(Command('secret santa init', secretSantaInit, ""))
 router.add(Command('secret santa begin', secretSantaBegin, ""))
 router.add(Command('secret santa add prompt', secretSantaAddPrompt, "", dmOnly=True))
 router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True))
+router.add(Command('secret santa add gift', secretSantaAddGift, "", dmOnly=True))
+router.add(Command('secret santa next', secretSantaNext, ""))
+# router.add(Command('secret santa ', hello, ""))
+# router.add(Command('secret santa ', hello, ""))
 
 router.add(Command('natural language command', naturalLanguageCommand, ""))
 router.add(Command('run', runPython, ""))
@@ -69,3 +73,5 @@ async def on_message(message):
         await naturalLanguageCommand(message, (message.content, replaceAnyFront(normalizedContent, triggerWords, '')))
         
 client.run(BOT_TOKEN)
+
+cleanUpDBConnection()

@@ -30,6 +30,26 @@ def cleanUpDBConnection():
     global _connection
     _connection.close()
 
+def getGlobalState(key):
+    connection = getDBConnection()
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM global_state WHERE key=%s', (key, ))
+        row = cursor.fetchone()
+        if row:
+            _id, key, value = row
+            return value
+        else:
+            return None
+
+def setGlobalState(key, value):
+    connection = getDBConnection()
+    with connection.cursor() as cursor:
+        if getGlobalState(key):
+            cursor.execute('UPDATE global_state SET value=%s WHERE key=%s', (value, key))
+        else:
+            cursor.execute('INSERT INTO global_state (key, value) VALUES (%s, %s)', (key, value))
+        connection.commit()
+
 def getDiscordClient():
     global _client
     if not _client:
