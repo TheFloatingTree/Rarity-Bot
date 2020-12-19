@@ -10,14 +10,7 @@ async def commands(message, path):
     await message.channel.send(
         """
         ```
-I use natural language processing so you can talk to me with regular English!
-I'll start listening when you start a message with "Hey Rarity", "Rarity", or "Okay Rarity"
-
-For example: Hey Rarity, what commands do you understand?
-
-However, if I'm having trouble understanding you, you can run specific commands by using the !rarity trigger.
-
-For example: !rarity help
+To run a command use !rarity
 
 Commands:
     help                        Show help for commands.
