@@ -1,6 +1,8 @@
 import discord
 import os
 import re
+import openai
+import json
 
 from appSettings import isProduction
 from router import Router
@@ -8,11 +10,13 @@ from routes import *
 from utilities import getDiscordClient, startsWithAny, replaceAnyFront, cleanUpDBConnection
 from command import Command
 
+
 if not isProduction():
     import dotenv
     dotenv.load_dotenv()
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 client = getDiscordClient()
 router = Router()
@@ -45,8 +49,6 @@ router.add(Command('secret santa add prompt', secretSantaAddPrompt, "", dmOnly=T
 router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True))
 router.add(Command('secret santa add gift', secretSantaAddGift, "", dmOnly=True))
 router.add(Command('secret santa next', secretSantaNext, ""))
-# router.add(Command('secret santa ', hello, ""))
-# router.add(Command('secret santa ', hello, ""))
 
 router.add(Command('natural language command', naturalLanguageCommand, ""))
 router.add(Command('run', runPython, ""))
@@ -70,7 +72,19 @@ async def on_message(message):
         nextPath = str.lower(message.content).partition(' ')[2] # remove first token from path, pass along
         await router.resolve(message, nextPath)
     elif startsWithAny(normalizedContent, triggerWords):
-        await naturalLanguageCommand(message, (message.content, replaceAnyFront(normalizedContent, triggerWords, '')))
+        response = openai.Completion.create(
+            engine="davinci",
+            prompt="Rarity is a chatbot that acts like the character Rarity from the TV show My Little Pony: Friendship is Magic. She is an elegant white unicorn with a purple mane that likes to make dresses.#How are you?#I'm doing very well, darling!#" + message.content + "#",
+            temperature=0.6,
+            max_tokens=64,
+            top_p=1,
+            stop=["#"]
+            )
+        responseBody = json.loads(response.last_response.body)
+        text = responseBody["choices"][0]["text"]
+        await message.channel.send(text)
+
+        
         
 client.run(BOT_TOKEN)
 
