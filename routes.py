@@ -143,9 +143,9 @@ async def secretSantaInit(message: discord.Message, path):
     state["secretSantaIsIniting"] = True
     utilities.setState(state)
 
-    currentSeason = utilities.getGlobalState('secretSantaCurrentSeason')
+    currentSeason = utilities.getPersistantState('secretSantaCurrentSeason')
     currentSeason = 1 if currentSeason == None else int(currentSeason) + 1
-    utilities.setGlobalState('secretSantaCurrentSeason', currentSeason)
+    utilities.setPersistantState('secretSantaCurrentSeason', currentSeason)
 
     # Send initial message to server chat
     newMessage: discord.Message = await message.channel.send("Lets do a gift exchange! Respond to this message with :YES: to join in!")
@@ -175,7 +175,7 @@ async def secretSantaBegin(message, path):
     state = utilities.getState()
     state["secretSantaIsIniting"] = False
     utilities.setState(state)
-    currentSeason = utilities.getGlobalState('secretSantaCurrentSeason')
+    currentSeason = utilities.getPersistantState('secretSantaCurrentSeason')
 
     # Check to see if everyone has put in their prompts
 
@@ -227,7 +227,7 @@ async def secretSantaBegin(message, path):
 # TODO: Secret santa help command
 
 async def secretSantaNext(message, path):
-    currentSeason = utilities.getGlobalState('secretSantaCurrentSeason')
+    currentSeason = utilities.getPersistantState('secretSantaCurrentSeason')
 
     connection = utilities.getDBConnection()
     client = utilities.getDiscordClient()
@@ -305,26 +305,6 @@ async def secretSantaWithdraw(message, path):
         connection.commit()
 
     await message.channel.send("You have successfully been removed from the secret santa event.")
-
-async def naturalLanguageCommand(message, content):
-    chatter = utilities.getChatter()
-    arguments = [""]
-
-    if isinstance(content, (tuple, list)):
-        originalContent, normalizedContent = content
-        arguments = utilities.betweenQuotes(originalContent)
-    else:
-        normalizedContent = content
-        
-    context, responseOrHandler = chatter.chat(normalizedContent)
-
-    if isinstance(responseOrHandler, str):
-        await message.channel.send(responseOrHandler)
-    else:
-        if arguments:
-            await responseOrHandler(message, arguments[0])
-        else:
-            await responseOrHandler(message, "")
 
 async def runPython(message, code):
     output = utilities.evaluatePython(code)

@@ -30,7 +30,7 @@ def cleanUpDBConnection():
     global _connection
     _connection.close()
 
-def getGlobalState(key):
+def getPersistantState(key):
     connection = getDBConnection()
     with connection.cursor() as cursor:
         cursor.execute('SELECT * FROM global_state WHERE key=%s', (key, ))
@@ -41,10 +41,10 @@ def getGlobalState(key):
         else:
             return None
 
-def setGlobalState(key, value):
+def setPersistantState(key, value):
     connection = getDBConnection()
     with connection.cursor() as cursor:
-        if getGlobalState(key):
+        if getPersistantState(key):
             cursor.execute('UPDATE global_state SET value=%s WHERE key=%s', (value, key))
         else:
             cursor.execute('INSERT INTO global_state (key, value) VALUES (%s, %s)', (key, value))
@@ -63,14 +63,6 @@ def getState():
 def setState(state):
     global _state
     _state = state
-
-def getChatter():
-    global _chatter
-    if not _chatter:
-        from conversationData import data
-        from chatter import Chatter
-        _chatter = Chatter(data)
-    return _chatter
 
 def startsWithAny(content, tokens):
     for token in tokens:
