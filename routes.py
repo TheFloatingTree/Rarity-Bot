@@ -306,6 +306,18 @@ async def secretSantaWithdraw(message, path):
 
     await message.channel.send("You have successfully been removed from the secret santa event.")
 
+async def clearContext(message, path):
+    username = message.author.display_name
+    state = utilities.getState()
+    state["gpt-3_context"][username].clear()
+    utilities.setState(state)
+    await message.channel.send("I've forgotten all about our conversation!")
+
+async def displayContext(message, path):
+    username = message.author.display_name
+    context = "\n".join(utilities.getState()["gpt-3_context"][username])
+    await message.channel.send(context if context else "I have no memory of speaking with you!")
+
 async def runPython(message, code):
     output = utilities.evaluatePython(code)
     await message.channel.send(output)

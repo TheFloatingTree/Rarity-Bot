@@ -50,6 +50,9 @@ router.add(Command('secret santa withdraw', secretSantaWithdraw, "", dmOnly=True
 router.add(Command('secret santa add gift', secretSantaAddGift, "", dmOnly=True))
 router.add(Command('secret santa next', secretSantaNext, ""))
 
+router.add(Command('clear context', clearContext, ""))
+router.add(Command('display context', displayContext, ""))
+
 router.add(Command('run', runPython, ""))
 
 @client.event
