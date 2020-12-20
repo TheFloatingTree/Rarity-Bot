@@ -10,14 +10,7 @@ async def commands(message, path):
     await message.channel.send(
         """
         ```
-I use natural language processing so you can talk to me with regular English!
-I'll start listening when you start a message with "Hey Rarity", "Rarity", or "Okay Rarity"
-
-For example: Hey Rarity, what commands do you understand?
-
-However, if I'm having trouble understanding you, you can run specific commands by using the !rarity trigger.
-
-For example: !rarity help
+To run a command use !rarity
 
 Commands:
     help                        Show help for commands.
@@ -140,6 +133,8 @@ async def emoteList(message, path):
             output += f"{emote[0]}\n"
     await message.channel.send(output)
 
+
+# Move initing flag to persistant state
 async def secretSantaInit(message: discord.Message, path):
     # State stuff
     state = utilities.getState()
@@ -147,6 +142,10 @@ async def secretSantaInit(message: discord.Message, path):
         return
     state["secretSantaIsIniting"] = True
     utilities.setState(state)
+
+    currentSeason = utilities.getPersistantState('secretSantaCurrentSeason')
+    currentSeason = 1 if currentSeason == None else int(currentSeason) + 1
+    utilities.setPersistantState('secretSantaCurrentSeason', currentSeason)
 
     # Send initial message to server chat
     newMessage: discord.Message = await message.channel.send("Lets do a gift exchange! Respond to this message with :YES: to join in!")
@@ -160,32 +159,142 @@ async def secretSantaInit(message: discord.Message, path):
 
         # Check if participant has already been added, skip if has
         with connection.cursor() as cursor:
-            cursor.execute("SELECT (participant) FROM secret_santa WHERE participant=%s", (str(user.id), ))
+            cursor.execute("SELECT (participant) FROM secret_santa WHERE participant=%s AND season=%s", (str(user.id), currentSeason))
             if cursor.fetchone() != None:
                 continue
 
         # Add participant
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO secret_santa (season, participant) VALUES (%s, %s)", (1, user.id))
+            cursor.execute("INSERT INTO secret_santa (season, participant, gift_revealed) VALUES (%s, %s, %s)", (currentSeason, user.id, False))
             connection.commit()
 
-        await user.send("Run 'Rarity secret santa add prompt' to put your prompt into the system.")
+        await user.send("Run '!rarity secret santa add prompt' to put your prompt into the system.")
 
 async def secretSantaBegin(message, path):
     # Remove secret santa init reaction listener loop
     state = utilities.getState()
     state["secretSantaIsIniting"] = False
     utilities.setState(state)
+    currentSeason = utilities.getPersistantState('secretSantaCurrentSeason')
+
+    # Check to see if everyone has put in their prompts
+
+    connection = utilities.getDBConnection()
+    client = utilities.getDiscordClient()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM secret_santa WHERE prompt IS NULL AND season=%s", (currentSeason, ))
+
+        allPromptsProvided = True
+        response = "Some participants have not provided prompts:\n"
+        for entry in cursor:
+            allPromptsProvided = False
+            user = await client.fetch_user(int(entry[2]))
+            response += f"{user.name}\n"
+
+        if not allPromptsProvided:
+            await message.channel.send(response)
+            return
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, participant, prompt, prompt_attachments FROM secret_santa WHERE season=%s", (currentSeason, ))
+        participants = cursor.fetchall()
+
+        # participants = list(map(tuple, participants))
+
+        totalParticipants = len(participants)
+        skip = random.randint(1, totalParticipants - 1)
+        for participantIndex, participant in enumerate(participants):
+
+            rowId, discordId, prompt, promptAttachments = participant
+            discordUser = await client.fetch_user(int(discordId))
+
+            # Pair participants in database
+
+            partnerIndex = (participantIndex + skip) % totalParticipants
+
+            partnerRowId, partnerDiscordId, partnerPrompt, partnerPromptAttachments = participants[partnerIndex]
+            partnerDiscordUser = await client.fetch_user(int(partnerDiscordId))
+
+            cursor.execute("UPDATE secret_santa SET paired_id=%s WHERE id=%s", (partnerRowId, rowId))
+            connection.commit()
+
+            # Send DM
+
+            partnerUsername = partnerDiscordUser.name
+            await discordUser.send(f'You are paired with {partnerUsername}.\nTheir prompt is:\n{partnerPrompt}\n{partnerPromptAttachments}')
+            await discordUser.send("Run '!rarity secret santa add gift' to put your gift into the system.")
+
+# TODO: Secret santa help command
+
+async def secretSantaNext(message, path):
+    currentSeason = utilities.getPersistantState('secretSantaCurrentSeason')
+
+    connection = utilities.getDBConnection()
+    client = utilities.getDiscordClient()
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM secret_santa WHERE gift IS NULL AND season=%s", (currentSeason, ))
+
+        allGiftsProvided = True
+        response = "Some participants have not provided gifts:\n"
+        for entry in cursor:
+            allGiftsProvided = False
+            user = await client.fetch_user(int(entry[2]))
+            response += f"{user.name}\n"
+
+        if not allGiftsProvided:
+            await message.channel.send(response)
+            return
+
+        cursor.execute("SELECT * FROM secret_santa WHERE season=%s AND gift_revealed=%s", (currentSeason, False))
+        response = cursor.fetchone()
+        if response == None:
+            await message.channel.send("No more gifts to reveal!")
+            return
+        rowId, season, discordId, prompt, promptAttachment, pairedId, gift, giftRevealed = response
+
+        cursor.execute("SELECT * FROM secret_santa WHERE id=%s", (pairedId, ))
+        partnerRowId, partnerSeason, partnerDiscordId, partnerPrompt, partnerPromptAttachment, partnerPairedId, partnerGift, partnerGiftRevealed = cursor.fetchone()
+
+        cursor.execute("UPDATE secret_santa SET gift_revealed=%s WHERE id=%s", (True, rowId))
+        connection.commit()
+
+        discordUser = await client.fetch_user(int(discordId))
+        partnerDiscordUser = await client.fetch_user(int(partnerDiscordId))
+
+        await message.channel.send(f'{discordUser.name} drew this for {partnerDiscordUser.name} based on the prompt "{partnerPrompt}"\n{gift}')
+
+        # Person drew this for Partner based on the prompt "the prompt"
+        # Gift
+
+# TODO: command to display all gifts by season number
 
 # rarity secret santa add prompt I want you to draw a picture of my oc
+# Specify in instructions that this command takes one prompt and one image
 async def secretSantaAddPrompt(message: discord.Message, path):
     userId = str(message.author.id)
     promptAttachments = list(map(lambda attachment: attachment.url, message.attachments))
 
     connection = utilities.getDBConnection()
     with connection.cursor() as cursor:
-            cursor.execute("UPDATE secret_santa SET prompt=%s, prompt_attachments=%s WHERE participant=%s", (path, promptAttachments, userId))
+        if promptAttachments:
+            cursor.execute("UPDATE secret_santa SET prompt=%s, prompt_attachments=%s WHERE participant=%s", (path, promptAttachments[0], userId))
+        else:
+            cursor.execute("UPDATE secret_santa SET prompt=%s WHERE participant=%s", (path, userId))
+        connection.commit()
+
+    await message.channel.send("You have successfully added a prompt to the secret santa event.")
+
+async def secretSantaAddGift(message: discord.Message, path):
+    userId = str(message.author.id)
+    promptAttachments = list(map(lambda attachment: attachment.url, message.attachments))
+
+    connection = utilities.getDBConnection()
+    with connection.cursor() as cursor:
+            cursor.execute("UPDATE secret_santa SET gift=%s WHERE participant=%s", (promptAttachments[0], userId))
             connection.commit()
+
+    await message.channel.send("You have successfully added your gift to the secret santa event.")
 
 async def secretSantaWithdraw(message, path):
     userId = str(message.author.id)
@@ -196,26 +305,6 @@ async def secretSantaWithdraw(message, path):
         connection.commit()
 
     await message.channel.send("You have successfully been removed from the secret santa event.")
-
-async def naturalLanguageCommand(message, content):
-    chatter = utilities.getChatter()
-    arguments = [""]
-
-    if isinstance(content, (tuple, list)):
-        originalContent, normalizedContent = content
-        arguments = utilities.betweenQuotes(originalContent)
-    else:
-        normalizedContent = content
-        
-    context, responseOrHandler = chatter.chat(normalizedContent)
-
-    if isinstance(responseOrHandler, str):
-        await message.channel.send(responseOrHandler)
-    else:
-        if arguments:
-            await responseOrHandler(message, arguments[0])
-        else:
-            await responseOrHandler(message, "")
 
 async def runPython(message, code):
     output = utilities.evaluatePython(code)
