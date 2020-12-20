@@ -30,6 +30,26 @@ def cleanUpDBConnection():
     global _connection
     _connection.close()
 
+def getPersistantState(key):
+    connection = getDBConnection()
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM global_state WHERE key=%s', (key, ))
+        row = cursor.fetchone()
+        if row:
+            _id, key, value = row
+            return value
+        else:
+            return None
+
+def setPersistantState(key, value):
+    connection = getDBConnection()
+    with connection.cursor() as cursor:
+        if getPersistantState(key):
+            cursor.execute('UPDATE global_state SET value=%s WHERE key=%s', (value, key))
+        else:
+            cursor.execute('INSERT INTO global_state (key, value) VALUES (%s, %s)', (key, value))
+        connection.commit()
+
 def getDiscordClient():
     global _client
     if not _client:
@@ -43,14 +63,6 @@ def getState():
 def setState(state):
     global _state
     _state = state
-
-def getChatter():
-    global _chatter
-    if not _chatter:
-        from conversationData import data
-        from chatter import Chatter
-        _chatter = Chatter(data)
-    return _chatter
 
 def startsWithAny(content, tokens):
     for token in tokens:
